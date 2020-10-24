@@ -109,7 +109,7 @@
     function buildList() {
         var wrapper = document.getElementById('list-wrapper')
         //wrapper.innerHTML = ''
-        var url = 'http://127.0.0.1:8000/api/task-list'
+        var url = 'http://159.89.155.127:8000/api/task-list'
         fetch(url)
             .then((resp) => resp.json())
             .then(function (data) {
@@ -181,9 +181,9 @@
     var form = document.getElementById('form-wrapper')
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        var url = 'http://127.0.0.1:8000/api/task-create'
+        var url = 'http://159.89.155.127:8000/task-create'
         if (activeItem != null) {
-            var url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}`
+            var url = `http://159.89.155.127:8000/task-update/${activeItem.id}`
             activeItem = null
         }
         var titulo = document.getElementById('titulo').value
@@ -206,7 +206,7 @@
     }
 
     function deleteItem(item) {
-        fetch(`http://127.0.0.1:8000/api/task-delete/${item.id}`, {
+        fetch(`http://159.89.155.127:8000/task-delete/${item.id}`, {
             method: 'DELETE',
             headers: {
                 'Content-type': 'application/json',
@@ -219,7 +219,7 @@
 
     function strikeUnstrike(item) {
         item.completed = !item.completed
-        fetch(`http://127.0.0.1:8000/api/task-update/${item.id}`, {
+        fetch(`http://159.89.155.127:8000/task-update/${item.id}`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
