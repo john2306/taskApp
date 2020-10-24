@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificacion IAnalytics</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background: #010003;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        span,
+        strike {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .head{
+            color: black;
+            background-color: rgb(255, 255, 255);
+            padding: 0.5rem;
+            border-radius: 5px !important;
+        }
+        .fondo{
+            background-color: #010003;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+       
+        {% if user.is_authenticated %}
+        <div class="right-align">
+            <a class="waves-effect waves-light btn" href="{% url 'logout' %}">Salir <i class="material-icons right">person_outline</i></a>
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-image">
+                <img
+                    src="https://i.imgur.com/YoLmb0f.jpg" width="100%">
+                <span class="card-title ">
+                            Tareas <img class="head m-2" src="https://i.imgur.com/oKqFHRt.png" alt="IAnalytics" style="width: 20%;">
+                </span>
+            </div>
+            <div class="card-content">
+                <form id="form-wrapper">
+                    <div class="row">
+                        <div class="input-field col s8 m10">
+                            <label for="titulo">Añadir tarea</label>
+                            <textarea id="titulo" class="materialize-textarea" placeholder="Nueva tarea"
+                                autocomplete="off"></textarea>
+                        </div>
+                        <div class="input-field col s4 m2">
+                            <button class="btn waves-effect waves-light" type="submit" id="submit">Nuevo
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="list-wrapper" class="card-action">
+                
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+    var is_loggedin = `{{request.user.is_authenticated|yesno:"true,false"}}`
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    var activeItem = null
+    var list_snapshot = []
+
+    if (is_loggedin){
+        buildList()
+    function buildList() {
+        var wrapper = document.getElementById('list-wrapper')
+        //wrapper.innerHTML = ''
+        var url = 'http://127.0.0.1:8000/api/task-list'
+        fetch(url)
+            .then((resp) => resp.json())
+            .then(function (data) {
+                var list = data
+                for (var i in list) {
+                    try {
+                        document.getElementById(`data-row-${i}`).remove()
+                    } catch (err) {
+                     
+                    }
+
+                    var titulo = `
+                        <div class="col s8 m8 titulo">
+                            ${list[i].titulo} 
+                        </div>`
+                    if (list[i].completed) {
+                        titulo = `
+                        <div class="col s8 m8 titulo">
+                            <strike>${list[i].titulo}</strike>
+                        </div>`
+                    }
+
+                    var item = `
+                    <div id="data-row-${i}" class = 'row'>
+                        ${titulo}
+                        <div class="col s2 m2 center-align">
+                            <button class="waves-effect waves-light btn edit"><i class="material-icons">edit</i></button> 
+                        </div>
+                        <div class="col s2 m2 center-align">
+                            <button class="waves-effect waves-light btn delete"><i class="material-icons">clear</i></button> 
+                        </div>
+                    </div>
+                `
+                    wrapper.innerHTML += item
+                }
+                if(list_snapshot.length > list.length){
+                    for (var i = list.length; i < list_snapshot.length; i++){
+                        document.getElementById(`data-row-${i}`).remove()
+                    }
+                }
+                list_snapshot = list
+
+                for (var i in list) {
+                    var editBtn = document.getElementsByClassName('edit')[i]
+                    var deleteBtn = document.getElementsByClassName('delete')[i]
+                    var titulo = document.getElementsByClassName('titulo')[i]
+
+                    editBtn.addEventListener('click', (function (item) {
+                        return function () {
+                            editItem(item)
+                        }
+                    })(list[i]))
+
+                    deleteBtn.addEventListener('click', (function (item) {
+                        return function () {
+                            deleteItem(item)
+                        }
+                    })(list[i]))
+
+                    titulo.addEventListener('click', (function (item) {
+                        return function () {
+                            strikeUnstrike(item)
+                        }
+                    })(list[i]))
+                }
+            })
+    }
+
+    var form = document.getElementById('form-wrapper')
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var url = 'http://127.0.0.1:8000/api/task-create'
+        if (activeItem != null) {
+            var url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}`
+            activeItem = null
+        }
+        var titulo = document.getElementById('titulo').value
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ 'titulo': titulo })
+        }).then(function (response) {
+            buildList()
+            form.reset()
+        })
+    })
+
+    function editItem(item) {
+        activeItem = item
+        document.getElementById('titulo').value = activeItem.titulo
+    }
+
+    function deleteItem(item) {
+        fetch(`http://127.0.0.1:8000/api/task-delete/${item.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        }).then((response) => {
+            buildList()
+        })
+    }
+
+    function strikeUnstrike(item) {
+        item.completed = !item.completed
+        fetch(`http://127.0.0.1:8000/api/task-update/${item.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                'titulo': item.titulo,
+                'completed': item.completed
+            })
+        }).then((response) => {
+            buildList()
+        })
+    }
+    }
+
+    
+
+</script>
+</html>
