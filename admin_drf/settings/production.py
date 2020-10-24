@@ -1,9 +1,9 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 
 
-ALLOWED_HOSTS = ['ianalytics.ml','www.ianalytics.com','159.89.48.214']
+ALLOWED_HOSTS = ['159.89.48.214','ianalytics.ml','www.ianalytics.com']
 
 DATABASES = {
     'default': {
