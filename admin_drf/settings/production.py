@@ -1,9 +1,9 @@
 from .base import *
 
-DEBUG = True
+DEBUG = False
 
 
-ALLOWED_HOSTS = ['165.227.12.179','taskapp.ml','www.taskapp.com','*.taskapp.ml']
+ALLOWED_HOSTS = ['165.227.12.179','taskapp.ml','www.taskapp.ml','*.taskapp.ml']
 
 DATABASES = {
     'default': {
