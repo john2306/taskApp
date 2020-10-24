@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <style>
@@ -30,32 +29,36 @@
         strike {
             font-family: 'Montserrat', sans-serif;
         }
-        .head{
+
+        .head {
             color: black;
             background-color: rgb(255, 255, 255);
             padding: 0.5rem;
             border-radius: 5px !important;
         }
-        .fondo{
+
+        .fondo {
             background-color: #010003;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-       
+
         {% if user.is_authenticated %}
         <div class="right-align">
-            <a class="waves-effect waves-light btn" href="{% url 'logout' %}">Salir <i class="material-icons right">person_outline</i></a>
+            <a class="waves-effect waves-light btn" href="{% url 'logout' %}">Salir <i
+                    class="material-icons right">person_outline</i></a>
         </div>
         {% endif %}
-        
+
         <div class="card">
             <div class="card-image">
-                <img
-                    src="https://i.imgur.com/YoLmb0f.jpg" width="100%">
+                <img src="https://i.imgur.com/YoLmb0f.jpg" width="100%">
                 <span class="card-title ">
-                            Tareas <img class="head m-2" src="https://i.imgur.com/oKqFHRt.png" alt="IAnalytics" style="width: 20%;">
+                    Tareas <img class="head m-2" src="https://i.imgur.com/oKqFHRt.png" alt="IAnalytics"
+                        style="width: 20%;">
                 </span>
             </div>
             <div class="card-content">
@@ -75,7 +78,7 @@
                 </form>
             </div>
             <div id="list-wrapper" class="card-action">
-                
+
             </div>
         </div>
     </div>
@@ -104,35 +107,33 @@
     var activeItem = null
     var list_snapshot = []
 
-    if (is_loggedin){
+    if (is_loggedin) {
         buildList()
-    function buildList() {
-        var wrapper = document.getElementById('list-wrapper')
-        //wrapper.innerHTML = ''
-        var url = 'http://159.89.155.127:8000/api/task-list'
-        fetch(url)
-            .then((resp) => resp.json())
-            .then(function (data) {
-                var list = data
-                for (var i in list) {
-                    try {
-                        document.getElementById(`data-row-${i}`).remove()
-                    } catch (err) {
-                     
-                    }
-
-                    var titulo = `
+        function buildList() {
+            var wrapper = document.getElementById('list-wrapper')
+            //wrapper.innerHTML = ''
+            var url = `{% url 'task-list' %}`
+            fetch(url)
+                .then((resp) => resp.json())
+                .then(function (data) {
+                    var list = data
+                    for (var i in list) {
+                        try {
+                            document.getElementById(`data-row-${i}`).remove()
+                        } catch (err) {
+                        }
+                        var titulo = `
                         <div class="col s8 m8 titulo">
                             ${list[i].titulo} 
                         </div>`
-                    if (list[i].completed) {
-                        titulo = `
+                        if (list[i].completed) {
+                            titulo = `
                         <div class="col s8 m8 titulo">
                             <strike>${list[i].titulo}</strike>
                         </div>`
-                    }
+                        }
 
-                    var item = `
+                        var item = `
                     <div id="data-row-${i}" class = 'row'>
                         ${titulo}
                         <div class="col s2 m2 center-align">
@@ -143,99 +144,105 @@
                         </div>
                     </div>
                 `
-                    wrapper.innerHTML += item
-                }
-                if(list_snapshot.length > list.length){
-                    for (var i = list.length; i < list_snapshot.length; i++){
-                        document.getElementById(`data-row-${i}`).remove()
+                        wrapper.innerHTML += item
                     }
-                }
-                list_snapshot = list
-
-                for (var i in list) {
-                    var editBtn = document.getElementsByClassName('edit')[i]
-                    var deleteBtn = document.getElementsByClassName('delete')[i]
-                    var titulo = document.getElementsByClassName('titulo')[i]
-
-                    editBtn.addEventListener('click', (function (item) {
-                        return function () {
-                            editItem(item)
+                    if (list_snapshot.length > list.length) {
+                        for (var i = list.length; i < list_snapshot.length; i++) {
+                            document.getElementById(`data-row-${i}`).remove()
                         }
-                    })(list[i]))
+                    }
+                    list_snapshot = list
 
-                    deleteBtn.addEventListener('click', (function (item) {
-                        return function () {
-                            deleteItem(item)
-                        }
-                    })(list[i]))
+                    for (var i in list) {
+                        var editBtn = document.getElementsByClassName('edit')[i]
+                        var deleteBtn = document.getElementsByClassName('delete')[i]
+                        var titulo = document.getElementsByClassName('titulo')[i]
 
-                    titulo.addEventListener('click', (function (item) {
-                        return function () {
-                            strikeUnstrike(item)
-                        }
-                    })(list[i]))
-                }
-            })
-    }
+                        editBtn.addEventListener('click', (function (item) {
+                            return function () {
+                                editItem(item)
+                            }
+                        })(list[i]))
 
-    var form = document.getElementById('form-wrapper')
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var url = 'http://159.89.155.127:8000/task-create'
-        if (activeItem != null) {
-            var url = `http://159.89.155.127:8000/task-update/${activeItem.id}`
-            activeItem = null
+                        deleteBtn.addEventListener('click', (function (item) {
+                            return function () {
+                                deleteItem(item)
+                            }
+                        })(list[i]))
+
+                        titulo.addEventListener('click', (function (item) {
+                            return function () {
+                                strikeUnstrike(item)
+                            }
+                        })(list[i]))
+                    }
+                })
         }
-        var titulo = document.getElementById('titulo').value
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({ 'titulo': titulo })
-        }).then(function (response) {
-            buildList()
-            form.reset()
-        })
-    })
 
-    function editItem(item) {
-        activeItem = item
-        document.getElementById('titulo').value = activeItem.titulo
-    }
-
-    function deleteItem(item) {
-        fetch(`http://159.89.155.127:8000/task-delete/${item.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-type': 'application/json',
-                'X-CSRFToken': csrftoken
+        var form = document.getElementById('form-wrapper')
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var url = `{% url 'task-create' %}`
+            if (activeItem != null) {
+                var idItem = activeItem.id
+                var url = "{% url 'task-update' 1 %}".replace(/1/, idItem.toString());
+                activeItem = null
             }
-        }).then((response) => {
-            buildList()
-        })
-    }
-
-    function strikeUnstrike(item) {
-        item.completed = !item.completed
-        fetch(`http://159.89.155.127:8000/task-update/${item.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({
-                'titulo': item.titulo,
-                'completed': item.completed
+            var titulo = document.getElementById('titulo').value
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ 'titulo': titulo })
+            }).then(function (response) {
+                buildList()
+                form.reset()
             })
-        }).then((response) => {
-            buildList()
         })
-    }
+
+        function editItem(item) {
+            activeItem = item
+            document.getElementById('titulo').value = activeItem.titulo
+        }
+
+        function deleteItem(item) {
+            var idItem = item.id
+            var url = "{% url 'task-delete' 1 %}".replace(/1/, idItem.toString());
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                }
+            }).then((response) => {
+                buildList()
+            })
+        }
+
+        function strikeUnstrike(item) {
+            var idItem = item.id
+            var url = "{% url 'task-update' 1 %}".replace(/1/, idItem.toString());
+            item.completed = !item.completed
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    'titulo': item.titulo,
+                    'completed': item.completed
+                })
+            }).then((response) => {
+                buildList()
+            })
+        }
     }
 
-    
+
 
 </script>
+
 </html>
