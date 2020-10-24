@@ -3,7 +3,7 @@ from .base import *
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['165.227.12.179','ianalytics.ml','www.ianalytics.com']
+ALLOWED_HOSTS = ['165.227.12.179','taskapp.ml','www.taskapp.com','*.taskapp.ml']
 
 DATABASES = {
     'default': {
